@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { TrendingUp, TrendingDown, Wine, AlertTriangle, Plus, Eye, Calendar, DollarSign } from 'lucide-react'
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 
-interface Wine {
+
+interface WineType {
   id: string
   name: string
   producer: string
@@ -42,7 +42,8 @@ interface PriceHistory {
 }
 
 export default function Dashboard() {
-  const [wines, setWines] = useState<Wine[]>([])
+  const supabase = useMemo(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!), [])
+  const [wines, setWines] = useState<WineType[]>([])
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [priceHistory, setPriceHistory] = useState<PriceHistory[]>([])
   const [loading, setLoading] = useState(true)

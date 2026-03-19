@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
-import { Search, Filter, Plus, Bottle, MapPin, Calendar, DollarSign, Thermometer, MoreVertical, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { Search, Filter, Plus, Wine as WineIcon, MapPin, Calendar, DollarSign, Thermometer, MoreVertical, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-interface Wine {
+
+interface WineItem {
   id: string;
   name: string;
   producer: string;
@@ -34,8 +34,9 @@ interface Wine {
 }
 
 export default function WinesPage() {
-  const [wines, setWines] = useState<Wine[]>([]);
-  const [filteredWines, setFilteredWines] = useState<Wine[]>([]);
+  const supabase = useMemo(() => createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!), []);
+  const [wines, setWines] = useState<WineItem[]>([]);
+  const [filteredWines, setFilteredWines] = useState<WineItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -105,8 +106,8 @@ export default function WinesPage() {
 
     // Sort
     filtered.sort((a, b) => {
-      let aValue: any = a[sortBy as keyof Wine];
-      let bValue: any = b[sortBy as keyof Wine];
+      let aValue: any = a[sortBy as keyof WineItem];
+      let bValue: any = b[sortBy as keyof WineItem];
 
       if (sortBy === 'name' || sortBy === 'producer') {
         aValue = aValue?.toLowerCase() || '';
@@ -128,12 +129,12 @@ export default function WinesPage() {
     return [...new Set(regions)].sort();
   };
 
-  const getPriceChange = (wine: Wine) => {
+  const getPriceChange = (wine: WineItem) => {
     if (!wine.current_price || !wine.initial_price) return null;
     return ((wine.current_price - wine.initial_price) / wine.initial_price) * 100;
   };
 
-  const getDrinkingWindow = (wine: Wine) => {
+  const getDrinkingWindow = (wine: WineItem) => {
     const prediction = wine.drinking_predictions?.[0];
     if (!prediction) return null;
 
@@ -153,7 +154,7 @@ export default function WinesPage() {
     }
   };
 
-  const WineCard = ({ wine }: { wine: Wine }) => {
+  const WineCard = ({ wine }: { wine: WineItem }) => {
     const priceChange = getPriceChange(wine);
     const drinkingWindow = getDrinkingWindow(wine);
     const primaryImage = wine.wine_images?.[0]?.image_url;
@@ -170,7 +171,7 @@ export default function WinesPage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <Bottle className="h-16 w-16 text-gray-400" />
+                <WineIcon className="h-16 w-16 text-gray-400" />
               </div>
             )}
             {wine.quantity > 1 && (
@@ -227,7 +228,7 @@ export default function WinesPage() {
     );
   };
 
-  const WineListItem = ({ wine }: { wine: Wine }) => {
+  const WineListItem = ({ wine }: { wine: WineItem }) => {
     const priceChange = getPriceChange(wine);
     const drinkingWindow = getDrinkingWindow(wine);
     const primaryImage = wine.wine_images?.[0]?.image_url;
@@ -244,7 +245,7 @@ export default function WinesPage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <Bottle className="h-8 w-8 text-gray-400" />
+                <WineIcon className="h-8 w-8 text-gray-400" />
               </div>
             )}
           </div>
@@ -467,7 +468,7 @@ export default function WinesPage() {
 
         {filteredWines.length === 0 ? (
           <div className="text-center py-12">
-            <Bottle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <WineIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No wines found</h3>
             <p className="text-gray-600 mb-6">
               {wines.length === 0 
